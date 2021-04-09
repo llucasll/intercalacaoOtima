@@ -60,101 +60,102 @@ void imprime_arquivo(char *name) {
 	} else printf("Erro ao abrir arquivo\n");
 }
 
-TVet *ordena_vetor(TVet *vet, int tam){
+TVet *ordena_vetor (TVet *vet, int tam) {
 	TCliente *cliente;
-	for(int i = tam-1; i>0;i = i-1){
-			for(int j=0; j<i; j=j+1){
-				if(vet[j].cli!=NULL){
-					if(vet[j].cli->cod_cliente > vet[j+1].cli->cod_cliente){
-						cliente = vet[j].cli;
-						vet[j].cli = vet[j+1].cli;
-						vet[j+1].cli = cliente;
-					}
+	for (int i = tam-1; i>0;i = i-1) {
+		for (int j=0; j<i; j=j+1) {
+			if (vet[j].cli!=NULL) {
+				if (vet[j].cli->cod_cliente > vet[j+1].cli->cod_cliente) {
+					cliente = vet[j].cli;
+					vet[j].cli = vet[j+1].cli;
+					vet[j+1].cli = cliente;
 				}
 			}
 		}
+	}
 	return vet;
 }
 
-int intercalacao_otima(char *nome_arquivo_saida, int num_p, TNomes *nome_particoes, int f) {
-	TNomes *aux_nome_particoes= nome_particoes;
+int intercalacao_otima (char *nome_arquivo_saida, int num_p, TNomes *nome_particoes, int f) {
+	
+	TNomes *aux_nome_particoes = nome_particoes;
+	
 	//TODO Implementar essa função
 	TCliente *cliente;
+	
 	//qual o numero da partição gerada atual
 	int count_particao_gerada;
+	
 	//contador para o retorno da função
-	int count =0;
-	while(aux_nome_particoes->prox != NULL){
-		count = count + 1;
-		TVet *vet = (TVet*)malloc(sizeof(TVet));
+	int count = 0;
+	
+	while (aux_nome_particoes->prox != NULL) {
+		count++;
+		TVet *vet = (TVet*) malloc(sizeof(TVet));
 		count_particao_gerada = (conta_nomes(nome_particoes) + 1);
 		char *nome_particao_gerada = gera_nome_particao(count_particao_gerada);
-
+		
 		FILE *particao_gerada;
+		
 		//para checar quando o ultimo arquivo é o utilizado
 		TNomes *checa_ultimo_arq = aux_nome_particoes;
-		for(int a =0;a<f-1;a=a+1){
-			checa_ultimo_arq=checa_ultimo_arq->prox;
+		
+		for (int a=0; a<f-1; a++) {
+			checa_ultimo_arq = checa_ultimo_arq->prox;
 		}
 		
-		if(checa_ultimo_arq!=NULL){
+		if (checa_ultimo_arq != NULL) {
 			particao_gerada = fopen(nome_particao_gerada,"w");
 		}
-		else{
+		else {
 			//caso seja o ultimo arquivo
 			particao_gerada = fopen("saida.txt", "w");
 		}
-
+		
 		//adiciona a nova particao no vetor de nomes das particoes
 		nome_particoes = insere_fim(nome_particoes, nome_particao_gerada);
+		
 		//contador da posição que cliente deve ser adicionado ao vetor
 		int count_vet = 0;
-
-		for(int a =0; a < f-1; a=a+1){
+		
+		for (int a=0; a<f-1; a++) {
 			//char *nome = gera_nome_particao(particao_atual);
 			FILE *arq = fopen(aux_nome_particoes->nome, "r");
-			while (!feof(arq))
-			{
+			
+			while (!feof(arq)) {
 				cliente = le_cliente(arq);
-				if (cliente != NULL){
+				if (cliente != NULL) {
+					
 					vet[count_vet].cli = cliente;
 					vet[count_vet].f = particao_gerada;
-					//printf("%s\n", vet[count_vet].cli->nome);
-					count_vet = count_vet +1;
 					
+					//printf("%s\n", vet[count_vet].cli->nome);
+					count_vet++;
 					
 					//alocando espaço para o proximo cliente no vetor
-					vet = (TVet*)realloc(vet,(count_vet+1)*sizeof(TVet));
+					vet = (TVet*) realloc(vet, (count_vet+1) * sizeof(TVet));
 				}
 			}
 			aux_nome_particoes = aux_nome_particoes->prox;
 			
 			fclose(arq);
 		}
-
+		
 		//algoritmo de ordenação
 		vet = ordena_vetor(vet, count_vet);
-
-		
 		
 		//printf("\n\n\n");
 		
-		for(int a =0;a<count_vet;a=a+1)
-		{
+		for (int a=0; a<count_vet; a++) {
 			//printf("%d\n", vet[a].cli->cod_cliente);
-			fprintf(particao_gerada,"%d;%s;\n", vet[a].cli->cod_cliente,vet[a].cli->nome);
-			
+			fprintf(particao_gerada, "%d;%s;\n", vet[a].cli->cod_cliente, vet[a].cli->nome);
 		}
 		
-
-
-
-	
-	free(vet);
-	fclose(particao_gerada);
+		free(vet);
+		fclose(particao_gerada);
 	}
-	return count;
 	
+	return count;
 }
 
 int main() {
